@@ -7,7 +7,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Number int
 
@@ -30,5 +33,19 @@ func main() {
 func ck(num Number, str string) {
 	if fmt.Sprint(num) != str {
 		panic("number.go: " + str)
+	}
+
+	v, ok := ParseNumber(str)
+	if strings.HasPrefix(str, "Number(") {
+		if ok {
+			panic("unum.go: should not parse " + str)
+		}
+		return
+	}
+	if !ok {
+		panic("unum.go: could not parse " + str)
+	}
+	if v != num {
+		panic("unum.go: wrong parse " + str)
 	}
 }

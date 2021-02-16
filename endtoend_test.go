@@ -132,7 +132,7 @@ func TestConstValueChange(t *testing.T) {
 	}
 	stringSource := filepath.Join(dir, "day_string.go")
 	// Run stringer in the directory that contains the package files.
-	err = runInDir(dir, stringer, "-type", "Day", "-output", stringSource)
+	err = runInDir(dir, stringer, "-type", "Day", "-genparser", "-output", stringSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +191,7 @@ func stringerCompileAndRun(t *testing.T, dir, stringer, typeName, fileName strin
 	}
 	stringSource := filepath.Join(dir, typeName+"_string.go")
 	// Run stringer in temporary directory.
-	err = run(stringer, "-type", typeName, "-output", stringSource, source)
+	err = run(stringer, "-type", typeName, "-output", stringSource, "-genparser", source)
 	if err != nil {
 		t.Fatal(err)
 	}

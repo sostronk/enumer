@@ -6,7 +6,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Gap int
 
@@ -40,5 +43,19 @@ func main() {
 func ck(gap Gap, str string) {
 	if fmt.Sprint(gap) != str {
 		panic("gap.go: " + str)
+	}
+
+	v, ok := ParseGap(str)
+	if strings.HasPrefix(str, "Gap(") {
+		if ok {
+			panic("gap.go: should not parse " + str)
+		}
+		return
+	}
+	if !ok {
+		panic("gap.go: could not parse " + str)
+	}
+	if v != gap {
+		panic("gap.go: wrong parse " + str)
 	}
 }

@@ -6,7 +6,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Unum uint8
 
@@ -34,5 +37,19 @@ func main() {
 func ck(unum Unum, str string) {
 	if fmt.Sprint(unum) != str {
 		panic("unum.go: " + str)
+	}
+
+	v, ok := ParseUnum(str)
+	if strings.HasPrefix(str, "Unum(") {
+		if ok {
+			panic("unum.go: should not parse " + str)
+		}
+		return
+	}
+	if !ok {
+		panic("unum.go: could not parse " + str)
+	}
+	if v != unum {
+		panic("unum.go: wrong parse " + str)
 	}
 }

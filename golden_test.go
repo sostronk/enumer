@@ -24,20 +24,22 @@ type Golden struct {
 	name        string
 	trimPrefix  string
 	lineComment bool
+	genParser   bool
 	input       string // input; the package clause is provided when running the test.
 	output      string // expected output.
 }
 
 var golden = []Golden{
-	{"day", "", false, day_in, day_out},
-	{"offset", "", false, offset_in, offset_out},
-	{"gap", "", false, gap_in, gap_out},
-	{"num", "", false, num_in, num_out},
-	{"unum", "", false, unum_in, unum_out},
-	{"unumpos", "", false, unumpos_in, unumpos_out},
-	{"prime", "", false, prime_in, prime_out},
-	{"prefix", "Type", false, prefix_in, prefix_out},
-	{"tokens", "", true, tokens_in, tokens_out},
+	{"day", "", false, false, day_in, day_out},
+	{"offset", "", false, false, offset_in, offset_out},
+	{"gap", "", false, false, gap_in, gap_out},
+	{"num", "", false, false, num_in, num_out},
+	{"unum", "", false, false, unum_in, unum_out},
+	{"unumpos", "", false, false, unumpos_in, unumpos_out},
+	{"prime", "", false, false, prime_in, prime_out},
+	{"prefix", "Type", false, false, prefix_in, prefix_out},
+	{"tokens", "", true, false, tokens_in, tokens_out},
+	{"tokens", "", true, true, tokens_in, tokensparser_out},
 }
 
 // Each example starts with "type XXX [u]int", with a single space separating them.
@@ -449,6 +451,50 @@ func (i Token) String() string {
 }
 `
 
+const tokensparser_out = `func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[And-0]
+	_ = x[Or-1]
+	_ = x[Add-2]
+	_ = x[Sub-3]
+	_ = x[Ident-4]
+	_ = x[Period-5]
+	_ = x[SingleBefore-6]
+	_ = x[BeforeAndInline-7]
+	_ = x[InlineGeneral-8]
+}
+
+const _Token_name = "&|+-Ident.SingleBeforeinlineinline general"
+
+var _Token_index = [...]uint8{0, 1, 2, 3, 4, 9, 10, 22, 28, 42}
+
+func (i Token) String() string {
+	if i < 0 || i >= Token(len(_Token_index)-1) {
+		return "Token(" + strconv.FormatInt(int64(i), 10) + ")"
+	}
+	return _Token_name[_Token_index[i]:_Token_index[i+1]]
+}
+
+var _Token_lookupMap = map[string]Token{
+	"&":              And,
+	"|":              Or,
+	"+":              Add,
+	"-":              Sub,
+	"Ident":          Ident,
+	".":              Period,
+	"SingleBefore":   SingleBefore,
+	"inline":         BeforeAndInline,
+	"inline general": InlineGeneral,
+}
+
+func ParseToken(s string) (Token, bool) {
+	v, ok := _Token_lookupMap[s]
+	return v, ok
+}
+`
+
 func TestGolden(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode")
@@ -465,6 +511,7 @@ func TestGolden(t *testing.T) {
 		g := Generator{
 			trimPrefix:  test.trimPrefix,
 			lineComment: test.lineComment,
+			genParser:   test.genParser,
 		}
 		input := "package test\n" + test.input
 		file := test.name + ".go"

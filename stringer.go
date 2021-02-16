@@ -90,6 +90,7 @@ var (
 	trimprefix  = flag.String("trimprefix", "", "trim the `prefix` from the generated constant names")
 	linecomment = flag.Bool("linecomment", false, "use line comment text as printed text when present")
 	buildTags   = flag.String("tags", "", "comma-separated list of build tags to apply")
+	genParser   = flag.Bool("genparser", false, "generate parser for the enum")
 )
 
 // Usage is a replacement usage function for the flags package.
@@ -130,6 +131,7 @@ func main() {
 	g := Generator{
 		trimPrefix:  *trimprefix,
 		lineComment: *linecomment,
+		genParser:   *genParser,
 	}
 	// TODO(suzmue): accept other patterns for packages (directories, list of files, import paths, etc).
 	if len(args) == 1 && isDirectory(args[0]) {
@@ -187,6 +189,7 @@ type Generator struct {
 
 	trimPrefix  string
 	lineComment bool
+	genParser   bool
 }
 
 func (g *Generator) Printf(format string, args ...interface{}) {
@@ -294,6 +297,10 @@ func (g *Generator) generate(typeName string) {
 		g.buildMultipleRuns(runs, typeName)
 	default:
 		g.buildMap(runs, typeName)
+	}
+
+	if g.genParser {
+		g.buildParser(runs, typeName)
 	}
 }
 
@@ -651,5 +658,24 @@ const stringMap = `func (i %[1]s) String() string {
 		return str
 	}
 	return "%[1]s(" + strconv.FormatInt(int64(i), 10) + ")"
+}
+`
+
+func (g *Generator) buildParser(runs [][]Value, typeName string) {
+	g.Printf("\n")
+	g.Printf("\nvar _%s_lookupMap = map[string]%s{\n", typeName, typeName)
+	for _, values := range runs {
+		for _, value := range values {
+			g.Printf("\t%q: %s,\n", value.name, value.originalName)
+		}
+	}
+	g.Printf("}\n\n")
+	g.Printf(stringParser, typeName)
+}
+
+// Argument to format is the type name.
+const stringParser = `func Parse%[1]s(s string) (%[1]s, bool) {
+	v, ok := _%[1]s_lookupMap[s]
+	return v, ok
 }
 `

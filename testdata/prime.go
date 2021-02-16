@@ -7,7 +7,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Prime int
 
@@ -52,5 +55,19 @@ func main() {
 func ck(prime Prime, str string) {
 	if fmt.Sprint(prime) != str {
 		panic("prime.go: " + str)
+	}
+
+	v, ok := ParsePrime(str)
+	if strings.HasPrefix(str, "Prime(") {
+		if ok {
+			panic("prime.go: should not parse " + str)
+		}
+		return
+	}
+	if !ok {
+		panic("prime.go: could not parse " + str)
+	}
+	if v != prime {
+		panic("prime.go: wrong parse " + str)
 	}
 }

@@ -6,7 +6,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Other int // Imagine this is in another package.
 
@@ -37,5 +40,19 @@ func main() {
 func ck(c Conv, str string) {
 	if fmt.Sprint(c) != str {
 		panic("conv.go: " + str)
+	}
+
+	v, ok := ParseConv(str)
+	if strings.HasPrefix(str, "Conv(") {
+		if ok {
+			panic("conv.go: should not parse " + str)
+		}
+		return
+	}
+	if !ok {
+		panic("conv.go: could not parse " + str)
+	}
+	if v != c {
+		panic("conv.go: wrong parse " + str)
 	}
 }

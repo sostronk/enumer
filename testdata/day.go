@@ -6,7 +6,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Day int
 
@@ -35,5 +38,19 @@ func main() {
 func ck(day Day, str string) {
 	if fmt.Sprint(day) != str {
 		panic("day.go: " + str)
+	}
+
+	v, ok := ParseDay(str)
+	if strings.HasPrefix(str, "Day(") {
+		if ok {
+			panic("day.go: should not parse " + str)
+		}
+		return
+	}
+	if !ok {
+		panic("day.go: could not parse " + str)
+	}
+	if v != day {
+		panic("day.go: wrong parse " + str)
 	}
 }
