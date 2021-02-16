@@ -152,7 +152,8 @@ func main() {
 	g.Printf("\n")
 	g.Printf("import \"strconv\"\n") // Used by all methods.
 	if g.genParser {
-		g.Printf("import \"fmt\"\n") // Used by all methods.
+		g.Printf("import \"fmt\"\n")      // Used by all methods.
+		g.Printf("import \"encoding\"\n") // Used by all methods.
 	}
 
 	// Run generate for each type.
@@ -677,7 +678,9 @@ func (g *Generator) buildParser(runs [][]Value, typeName string) {
 }
 
 // Argument to format is the type name.
-const stringParser = `func (i *%[1]s) UnmarshalText(text []byte) error {
+const stringParser = `var _ encoding.TextUnmarshaler = (*%[1]s)(nil)
+
+func (i *%[1]s) UnmarshalText(text []byte) error {
 	if v, ok := _%[1]s_lookupMap[string(text)]; ok {
 		*i = v
 		return nil

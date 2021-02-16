@@ -489,6 +489,8 @@ var _Token_lookupMap = map[string]Token{
 	"inline general": InlineGeneral,
 }
 
+var _ encoding.TextUnmarshaler = (*Token)(nil)
+
 func (i *Token) UnmarshalText(text []byte) error {
 	if v, ok := _Token_lookupMap[string(text)]; ok {
 		*i = v
