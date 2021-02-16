@@ -1,4 +1,4 @@
-module gitlab.com/sostronk/goenum
+module gitlab.com/sostronk/enumer
 
 go 1.15
 

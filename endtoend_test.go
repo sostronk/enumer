@@ -20,12 +20,12 @@ import (
 	"strings"
 	"testing"
 
-	"gitlab.com/sostronk/goenum/testenv"
+	"gitlab.com/sostronk/enumer/testenv"
 )
 
 // This file contains a test that compiles and runs each program in testdata
 // after generating the string method for its type. The rule is that for testdata/x.go
-// we run stringer -type X and then compile and run the program. The resulting
+// we run enumer -type X and then compile and run the program. The resulting
 // binary panics if the String method for X is not correct, including for error cases.
 
 func TestEndToEnd(t *testing.T) {
@@ -33,7 +33,7 @@ func TestEndToEnd(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
-	dir, stringer := buildStringer(t)
+	dir, enumer := buildEnumer(t)
 	defer os.RemoveAll(dir)
 	// Read the testdata directory.
 	fd, err := os.Open("testdata")
@@ -61,7 +61,7 @@ func TestEndToEnd(t *testing.T) {
 		}
 		// Names are known to be ASCII and long enough.
 		typeName := fmt.Sprintf("%c%s", name[0]+'A'-'a', name[1:len(name)-len(".go")])
-		stringerCompileAndRun(t, dir, stringer, typeName, name)
+		enumerCompileAndRun(t, dir, enumer, typeName, name)
 	}
 }
 
@@ -71,7 +71,7 @@ func TestTags(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
-	dir, stringer := buildStringer(t)
+	dir, enumer := buildEnumer(t)
 	defer os.RemoveAll(dir)
 	var (
 		protectedConst = []byte("TagProtected")
@@ -83,12 +83,12 @@ func TestTags(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	// Run stringer in the directory that contains the package files.
-	// We cannot run stringer in the current directory for the following reasons:
+	// Run enumer in the directory that contains the package files.
+	// We cannot run enumer in the current directory for the following reasons:
 	// - Versions of Go earlier than Go 1.11, do not support absolute directories as a pattern.
 	// - When the current directory is inside a go module, the path will not be considered
 	//   a valid path to a package.
-	err := runInDir(dir, stringer, "-type", "Const", ".")
+	err := runInDir(dir, enumer, "-type", "Const", ".")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +103,7 @@ func TestTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = runInDir(dir, stringer, "-type", "Const", "-tags", "tag", ".")
+	err = runInDir(dir, enumer, "-type", "Const", "-tags", "tag", ".")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,13 +117,13 @@ func TestTags(t *testing.T) {
 }
 
 // TestConstValueChange verifies that if a constant value changes and
-// the stringer code is not regenerated, we'll get a compiler error.
+// the enumer code is not regenerated, we'll get a compiler error.
 func TestConstValueChange(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode")
 	}
 
-	dir, stringer := buildStringer(t)
+	dir, enumer := buildEnumer(t)
 	defer os.RemoveAll(dir)
 	source := filepath.Join(dir, "day.go")
 	err := copy(source, filepath.Join("testdata", "day.go"))
@@ -131,8 +131,8 @@ func TestConstValueChange(t *testing.T) {
 		t.Fatal(err)
 	}
 	stringSource := filepath.Join(dir, "day_string.go")
-	// Run stringer in the directory that contains the package files.
-	err = runInDir(dir, stringer, "-type", "Day", "-genparser", "-output", stringSource)
+	// Run enumer in the directory that contains the package files.
+	err = runInDir(dir, enumer, "-type", "Day", "-genparser", "-output", stringSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -162,26 +162,26 @@ func TestConstValueChange(t *testing.T) {
 	}
 }
 
-// buildStringer creates a temporary directory and installs stringer there.
-func buildStringer(t *testing.T) (dir string, stringer string) {
+// buildEnumer creates a temporary directory and installs enumer there.
+func buildEnumer(t *testing.T) (dir string, enumer string) {
 	t.Helper()
 	testenv.NeedsTool(t, "go")
 
-	dir, err := ioutil.TempDir("", "stringer")
+	dir, err := ioutil.TempDir("", "enumer")
 	if err != nil {
 		t.Fatal(err)
 	}
-	stringer = filepath.Join(dir, "stringer.exe")
-	err = run("go", "build", "-o", stringer)
+	enumer = filepath.Join(dir, "enumer.exe")
+	err = run("go", "build", "-o", enumer)
 	if err != nil {
-		t.Fatalf("building stringer: %s", err)
+		t.Fatalf("building enumer: %s", err)
 	}
-	return dir, stringer
+	return dir, enumer
 }
 
-// stringerCompileAndRun runs stringer for the named file and compiles and
+// enumerCompileAndRun runs enumer for the named file and compiles and
 // runs the target binary in directory dir. That binary will panic if the String method is incorrect.
-func stringerCompileAndRun(t *testing.T, dir, stringer, typeName, fileName string) {
+func enumerCompileAndRun(t *testing.T, dir, enumer, typeName, fileName string) {
 	t.Helper()
 	t.Logf("run: %s %s\n", fileName, typeName)
 	source := filepath.Join(dir, fileName)
@@ -190,8 +190,8 @@ func stringerCompileAndRun(t *testing.T, dir, stringer, typeName, fileName strin
 		t.Fatalf("copying file to temporary directory: %s", err)
 	}
 	stringSource := filepath.Join(dir, typeName+"_string.go")
-	// Run stringer in temporary directory.
-	err = run(stringer, "-type", typeName, "-output", stringSource, "-genparser", source)
+	// Run enumer in temporary directory.
+	err = run(enumer, "-type", typeName, "-output", stringSource, "-genparser", source)
 	if err != nil {
 		t.Fatal(err)
 	}
