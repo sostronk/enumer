@@ -496,9 +496,6 @@ func ParseToken(s string) (Token, bool) {
 `
 
 func TestGolden(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode")
-	}
 	testenv.NeedsTool(t, "go")
 
 	dir, err := ioutil.TempDir("", "enumer")
