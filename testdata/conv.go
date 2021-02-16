@@ -42,14 +42,15 @@ func ck(c Conv, str string) {
 		panic("conv.go: " + str)
 	}
 
-	v, ok := ParseConv(str)
+	var v Conv
+	err := v.UnmarshalText([]byte(str))
 	if strings.HasPrefix(str, "Conv(") {
-		if ok {
+		if err == nil {
 			panic("conv.go: should not parse " + str)
 		}
 		return
 	}
-	if !ok {
+	if err != nil {
 		panic("conv.go: could not parse " + str)
 	}
 	if v != c {

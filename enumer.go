@@ -151,6 +151,9 @@ func main() {
 	g.Printf("package %s", g.pkg.name)
 	g.Printf("\n")
 	g.Printf("import \"strconv\"\n") // Used by all methods.
+	if g.genParser {
+		g.Printf("import \"fmt\"\n") // Used by all methods.
+	}
 
 	// Run generate for each type.
 	for _, typeName := range types {
@@ -674,8 +677,11 @@ func (g *Generator) buildParser(runs [][]Value, typeName string) {
 }
 
 // Argument to format is the type name.
-const stringParser = `func Parse%[1]s(s string) (%[1]s, bool) {
-	v, ok := _%[1]s_lookupMap[s]
-	return v, ok
+const stringParser = `func (i *%[1]s) UnmarshalText(text []byte) error {
+	if v, ok := _%[1]s_lookupMap[string(text)]; ok {
+		*i = v
+		return nil
+	}
+	return fmt.Errorf("%%q is not a valid %[1]s", string(text))
 }
 `

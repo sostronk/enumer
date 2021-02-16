@@ -45,14 +45,15 @@ func ck(gap Gap, str string) {
 		panic("gap.go: " + str)
 	}
 
-	v, ok := ParseGap(str)
+	var v Gap
+	err := v.UnmarshalText([]byte(str))
 	if strings.HasPrefix(str, "Gap(") {
-		if ok {
+		if err == nil {
 			panic("gap.go: should not parse " + str)
 		}
 		return
 	}
-	if !ok {
+	if err != nil {
 		panic("gap.go: could not parse " + str)
 	}
 	if v != gap {

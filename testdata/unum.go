@@ -39,14 +39,15 @@ func ck(unum Unum, str string) {
 		panic("unum.go: " + str)
 	}
 
-	v, ok := ParseUnum(str)
+	var v Unum
+	err := v.UnmarshalText([]byte(str))
 	if strings.HasPrefix(str, "Unum(") {
-		if ok {
+		if err == nil {
 			panic("unum.go: should not parse " + str)
 		}
 		return
 	}
-	if !ok {
+	if err != nil {
 		panic("unum.go: could not parse " + str)
 	}
 	if v != unum {

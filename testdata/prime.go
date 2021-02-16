@@ -57,14 +57,15 @@ func ck(prime Prime, str string) {
 		panic("prime.go: " + str)
 	}
 
-	v, ok := ParsePrime(str)
+	var v Prime
+	err := v.UnmarshalText([]byte(str))
 	if strings.HasPrefix(str, "Prime(") {
-		if ok {
+		if err == nil {
 			panic("prime.go: should not parse " + str)
 		}
 		return
 	}
-	if !ok {
+	if err != nil {
 		panic("prime.go: could not parse " + str)
 	}
 	if v != prime {

@@ -489,9 +489,12 @@ var _Token_lookupMap = map[string]Token{
 	"inline general": InlineGeneral,
 }
 
-func ParseToken(s string) (Token, bool) {
-	v, ok := _Token_lookupMap[s]
-	return v, ok
+func (i *Token) UnmarshalText(text []byte) error {
+	if v, ok := _Token_lookupMap[string(text)]; ok {
+		*i = v
+		return nil
+	}
+	return fmt.Errorf("%q is not a valid Token", string(text))
 }
 `
 

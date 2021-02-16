@@ -36,14 +36,15 @@ func ck(num Num, str string) {
 		panic("num.go: " + str)
 	}
 
-	v, ok := ParseNum(str)
+	var v Num
+	err := v.UnmarshalText([]byte(str))
 	if strings.HasPrefix(str, "Num(") {
-		if ok {
+		if err == nil {
 			panic("num.go: should not parse " + str)
 		}
 		return
 	}
-	if !ok {
+	if err != nil {
 		panic("num.go: could not parse " + str)
 	}
 	if v != num {

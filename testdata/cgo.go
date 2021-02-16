@@ -33,14 +33,15 @@ func ck(day Cgo, str string) {
 		panic("cgo.go: " + str)
 	}
 
-	v, ok := ParseCgo(str)
+	var v Cgo
+	err := v.UnmarshalText([]byte(str))
 	if strings.HasPrefix(str, "Cgo(") {
-		if ok {
+		if err == nil {
 			panic("cgo.go: should not parse " + str)
 		}
 		return
 	}
-	if !ok {
+	if err != nil {
 		panic("cgo.go: could not parse " + str)
 	}
 	if v != day {
