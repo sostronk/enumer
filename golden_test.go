@@ -16,7 +16,7 @@ import (
 	"strings"
 	"testing"
 
-	"gitlab.com/sostronk/enumer/testenv"
+	"github.com/sostronk/enumer/testenv"
 )
 
 // Golden represents a test case.
